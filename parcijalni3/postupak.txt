@@ -1,0 +1,91 @@
+1.) Unos tablica i podataka.
+a) Izrada baze zaposlenici i dodavanje tablica:
+mysql -u root -p < tablice.sql
+b) Unos podataka u tablice:
+mysql -u root -p < podaci.sql
+
+
+2.) Dohvatiti sve zaposlenike i njihove place (select.sql):
+	SELECT 
+		zaposlenici.id_zaposlenik AS 'ID',
+		zaposlenici.ime AS 'Ime', 
+		zaposlenici.prezime AS 'Prezime', 
+		place.placa AS 'Placa'
+	FROM zaposlenici
+	JOIN place ON zaposlenici.placa = place.id_placa;
+
+	+----+------+-----------+-------+
+	| ID | Ime  | Prezime   | Placa |
+	+----+------+-----------+-------+
+	|  1 | Ivo  | Ivic      |  4000 |
+	|  2 | Kata | Katic     |  5000 |
+	|  3 | Mato | Matic     |  6000 |
+	|  4 | Ana  | Anic      |  8000 |
+	|  5 | Bob  | Bobbinsky | 10000 |
+	+----+------+-----------+-------+
+
+
+3.) Dohvatite sve voditelje odjela i izracunajte prosjek njihovih placa (select.sql):
+
+	a) Svi voditelji:
+
+		SELECT 
+			zaposlenici.id_zaposlenik AS 'ID', 
+			CONCAT(zaposlenici.ime, ' ', zaposlenici.prezime) AS 'Voditelji odjela', 
+			odjeli.odjel AS 'Odjel', 
+			place.placa AS 'Placa'
+		FROM zaposlenici_odjeli_pozicije AS zapodpoz
+		JOIN zaposlenici ON zapodpoz.id_zaposlenik = zaposlenici.id_zaposlenik
+		JOIN odjeli ON zapodpoz.id_odjel = odjeli.id_odjel
+		JOIN pozicije ON zapodpoz.id_pozicija = pozicije.id_pozicija
+		JOIN place ON zaposlenici.placa = place.id_placa
+		WHERE zapodpoz.id_pozicija = 3;
+
+		+----+------------------+-----------+-------+
+		| ID | Voditelji odjela | Odjel     | Placa |
+		+----+------------------+-----------+-------+
+		|  2 | Kata Katic       | Marketing |  5000 |
+		|  4 | Ana Anic         | Dizajn    |  8000 |
+		|  5 | Bob Bobbinsky    | Backend   | 10000 |
+		+----+------------------+-----------+-------+
+
+
+	b) Prosjek place voditelja:
+		SELECT 
+			ROUND(AVG(place.placa), 2) AS 'Prosjecna placa voditelja odjela' 
+		FROM 
+			zaposlenici_odjeli_pozicije AS zapodpoz 
+		JOIN zaposlenici ON zapodpoz.id_zaposlenik = zaposlenici.id_zaposlenik
+		JOIN odjeli ON zapodpoz.id_odjel = odjeli.id_odjel
+		JOIN place ON zaposlenici.placa = place.id_placa
+		WHERE zapodpoz.id_pozicija = 3;
+
+		+----------------------------------+
+		| Prosjecna placa voditelja odjela |
+		+----------------------------------+
+		|                          7666.67 |
+		+----------------------------------+
+
+
+4.) Kreirajte proceduru koja ce racunati prosjek placa svih zaposlenika (procedura.sql):
+	DELIMITER //
+
+	CREATE PROCEDURE ProsjecnaPlacaZaposlenika()
+	BEGIN
+	    SELECT ROUND(AVG(place.placa), 2) AS 'Prosjecna placa' 
+	    FROM zaposlenici
+	    JOIN place ON zaposlenici.placa = place.id_placa;
+	END //
+
+	DELIMITER ;
+
+
+	a) Poziv procedure:
+		CALL ProsjecnaPlacaZaposlenika;
+
+		+-----------------+
+		| Prosjecna placa |
+		+-----------------+
+		|         6600.00 |
+		+-----------------+
+

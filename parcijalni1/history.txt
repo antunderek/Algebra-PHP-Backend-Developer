@@ -1,0 +1,32 @@
+    1  sudo apt update
+    2  sudo apt install vim apache2 mysql-server php libapache2-mod-php php-mysql curl php-cli php-mbstring git unzip
+    3  sudo ufw allow in "Apache Full"
+    4  sudo mysql_secure_installation
+    5  sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password'; FLUSH PRIVILEGES; SELECT user,authentication_string,plugin,host FROM mysql.user;"
+    6  curl -sS https://getcomposer.org/installer -o composer-setup.php
+    7  HASH=e0012edf3e80b6978849f5eff0d4b4e4c79ff1609dd1e613307e16318854d24ae64f26d17af3ef0bf7cfb710ca74755a
+    8  php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+    9  sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+   10  composer
+   11  sudo mkdir -p /var/www/html/ParcijalniIspit
+   12  sudo chown -R $USER:$USER /var/www/html/ParcijalniIspit; sudo chmod -R 755 /var/www/html
+   13  sudo cp /etc/apache2/sites-available/000-default.conf /etc/apache2/sites-available/ParcijalniIspit.conf
+   14  sudo vim /etc/apache2/sites-available/ParcijalniIspit.conf
+   15  sudo a2dissite 000-default.conf; sudo a2ensite ParcijalniIspit.conf 
+   16  systemctl reload apache2
+   17  sudo systemctl status apache2
+   18  sudo vim /etc/hosts
+   19  git config --global user.name "antunderek"; git config --global user.email "62905719+antunderek@users.noreply.github.com"
+   20  git config --global --list
+   21  cd /var/www/html/ParcijalniIspit/
+   22  git init
+   23  ll
+   24  git remote add origin https://github.com/antunderek/parcijalni-ispit-alge.git
+   25  composer require nesbot/carbon
+   26  ll
+   27  echo vendor >> .gitignore
+   28  git status
+   29  git add -A
+   30  git commit -m "initial commit"
+   31  git push -u origin master
+   32  history >> history.txt
